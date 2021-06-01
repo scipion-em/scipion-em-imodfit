@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 # **************************************************************************
 # *
-# * Authors:     you (you@yourinstitution.email)
+# * Authors:     you (ddelhoyo@cnb.csic.es)
 # *
-# * your institution
+# * Unidad de  Bioinformatica of Centro Nacional de Biotecnologia , CSIC
 # *
 # * This program is free software; you can redistribute it and/or modify
 # * it under the terms of the GNU General Public License as published by
@@ -30,8 +30,8 @@
 Describe your python module here:
 This module will provide the traditional Hello world example
 """
-from pyworkflow.protocol import Protocol, params, Integer
-from pwem.objects.data import AtomStruct, Volume
+from pyworkflow.protocol import Protocol, params
+from pwem.objects.data import AtomStruct
 from pyworkflow.utils import Message
 import pyworkflow.utils as pwutils
 import os
@@ -192,11 +192,15 @@ class imodfitFlexFitting(Protocol):
 
     def createOutputStep(self):
         fittedPDB = AtomStruct(self._getExtraPath('{}_fitted.pdb'.format(self.outputBasename.get())))
+        moviePDB = AtomStruct(self._getExtraPath('{}_movie.pdb'.format(self.outputBasename.get())))
         if self.importFrom.get() == self.FROM_SCIPION:
           fittedPDB.setVolume(self.inputVolume.get())
+          moviePDB.setVolume(self.inputVolume.get())
+
         elif self.importFrom.get() == self.FROM_FILE:
           pass
         self._defineOutputs(fittedPDB=fittedPDB)
+        self._defineOutputs(moviePDB=moviePDB)
 
     # --------------------------- INFO functions -----------------------------------
     def _summary(self):
