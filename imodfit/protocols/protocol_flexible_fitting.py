@@ -27,8 +27,8 @@
 
 
 """
-Describe your python module here:
-This module will provide the traditional Hello world example
+This protocol is used to perform a flexible fitting of a protein structure over a electron map.
+A rigid fitting for ensuring their prior best positions is needed before performing this flexible fitting.
 """
 from pyworkflow.protocol import Protocol, params
 from pwem.objects.data import AtomStruct
@@ -75,16 +75,16 @@ class imodfitFlexFitting(Protocol):
                        choices=importChoices, default=self.FROM_SCIPION,
                        label='Atom structure from',
                        help='Select the atom structure source')
-        group.addParam('inputAtomStruct', params.PointerParam,
-                       pointerClass='AtomStruct', allowsNull=False,
-                       condition='importFromAtom==FROM_SCIPION',
-                       label="Input atom structure",
-                       help='Select the atom structure to be fitted in the volume')
         group.addParam('inputAtomStructFile', params.FileParam,
                        allowsNull=False,
                        condition='importFromAtom==FROM_FILE',
                        label="Input pdb file",
                        help='Select the atom structure file to be fitted in the volume')
+        group.addParam('inputAtomStruct', params.PointerParam,
+                       pointerClass='AtomStruct', allowsNull=False,
+                       condition='importFromAtom==FROM_SCIPION',
+                       label="Input atom structure",
+                       help='Select the atom structure to be fitted in the volume')
 
         form.addSection(label='Parameters')
         group = form.addGroup('Parameters')
