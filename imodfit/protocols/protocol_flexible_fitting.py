@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 # **************************************************************************
 # *
-# * Authors:     you (you@yourinstitution.email)
+# * Authors:     you (ddelhoyo@cnb.csic.es)
 # *
-# * your institution
+# * Unidad de  Bioinformatica of Centro Nacional de Biotecnologia , CSIC
 # *
 # * This program is free software; you can redistribute it and/or modify
 # * it under the terms of the GNU General Public License as published by
@@ -27,11 +27,11 @@
 
 
 """
-Describe your python module here:
-This module will provide the traditional Hello world example
+This protocol is used to perform a flexible fitting of a protein structure over a electron map.
+A rigid fitting for ensuring their prior best positions is needed before performing this flexible fitting.
 """
-from pyworkflow.protocol import Protocol, params, Integer
-from pwem.objects.data import AtomStruct, Volume
+from pyworkflow.protocol import Protocol, params
+from pwem.objects.data import AtomStruct
 from pyworkflow.utils import Message
 import pyworkflow.utils as pwutils
 import os
@@ -75,16 +75,16 @@ class imodfitFlexFitting(Protocol):
                        choices=importChoices, default=self.FROM_SCIPION,
                        label='Atom structure from',
                        help='Select the atom structure source')
-        group.addParam('inputAtomStruct', params.PointerParam,
-                       pointerClass='AtomStruct', allowsNull=False,
-                       condition='importFromAtom==FROM_SCIPION',
-                       label="Input atom structure",
-                       help='Select the atom structure to be fitted in the volume')
         group.addParam('inputAtomStructFile', params.FileParam,
                        allowsNull=False,
                        condition='importFromAtom==FROM_FILE',
                        label="Input pdb file",
                        help='Select the atom structure file to be fitted in the volume')
+        group.addParam('inputAtomStruct', params.PointerParam,
+                       pointerClass='AtomStruct', allowsNull=False,
+                       condition='importFromAtom==FROM_SCIPION',
+                       label="Input atom structure",
+                       help='Select the atom structure to be fitted in the volume')
 
         form.addSection(label='Parameters')
         group = form.addGroup('Parameters')
@@ -192,11 +192,15 @@ class imodfitFlexFitting(Protocol):
 
     def createOutputStep(self):
         fittedPDB = AtomStruct(self._getExtraPath('{}_fitted.pdb'.format(self.outputBasename.get())))
+        moviePDB = AtomStruct(self._getExtraPath('{}_movie.pdb'.format(self.outputBasename.get())))
         if self.importFrom.get() == self.FROM_SCIPION:
           fittedPDB.setVolume(self.inputVolume.get())
+          moviePDB.setVolume(self.inputVolume.get())
+
         elif self.importFrom.get() == self.FROM_FILE:
           pass
         self._defineOutputs(fittedPDB=fittedPDB)
+        self._defineOutputs(moviePDB=moviePDB)
 
     # --------------------------- INFO functions -----------------------------------
     def _summary(self):
