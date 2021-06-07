@@ -68,25 +68,19 @@ class TestImodfit(BaseTest):
         cls.launchProtocol(protImportPDB)
         cls.protImportPDB = protImportPDB
 
-    def _runIMODFIT(self, importFrom=FROM_FILE):
+    def _runIMODFIT(self):
         protImodfit = self.newProtocol(
             imodfitFlexFitting,
-            importFrom=importFrom, inputVolumeFile=self.volFile,
-            importFromAtom=importFrom, inputAtomStructFile=self.pdbFile)
-
-        if importFrom==FROM_SCIPION:
-            protImodfit.inputVolume.set(self.protImportVol.outputVolume)
-            protImodfit.inputAtomStruct.set(self.protImportPDB.outputPdb)
+            inputVolume=self.protImportVol.outputVolume,
+            inputAtomStruct=self.protImportPDB.outputPdb)
 
         self.launchProtocol(protImodfit)
         pdbOut = getattr(protImodfit, 'fittedPDB', None)
         self.assertIsNotNone(pdbOut)
 
     def test_IMODFIT_fromScipion(self):
-        self._runIMODFIT(FROM_SCIPION)
+        self._runIMODFIT()
 
-    def test_IMODFIT_fromFiles(self):
-        self._runIMODFIT(FROM_FILE)
 
 
 

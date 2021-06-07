@@ -32,6 +32,7 @@ A rigid fitting for ensuring their prior best positions is needed before perform
 """
 from pyworkflow.protocol import Protocol, params
 from pwem.objects.data import AtomStruct
+from pwem.emlib.image import ImageHandler
 from pyworkflow.utils import Message
 import pyworkflow.utils as pwutils
 import os
@@ -44,45 +45,20 @@ class imodfitFlexFitting(Protocol):
     Tutorial: https://chaconlab.org/hybrid4em/imodfit/imodfit-intro
     """
     _label = 'Flexible fitting'
-    FROM_FILE = 0
-    FROM_SCIPION = 1
 
     # -------------------------- DEFINE param functions ----------------------
     def _defineParams(self, form):
         """ """
-        importChoices = self._getImportChoices()
         cgChoices = self._get_cgChoices()
 
         form.addSection(label=Message.LABEL_INPUT)
-        group = form.addGroup('Volume')
-        group.addParam('importFrom', params.EnumParam,
-                      choices=importChoices, default=self.FROM_SCIPION,
-                      label='Volume from',
-                      help='Select the volume source')
-        group.addParam('inputVolumeFile', params.FileParam,
-                      allowsNull=False,
-                      condition='importFrom==FROM_FILE',
-                      label="Input volume file",
-                      help='Target EM map file (mrc or ccp4)')
-        group.addParam('inputVolume', params.PointerParam,
+        form.addParam('inputVolume', params.PointerParam,
                       pointerClass='Volume', allowsNull=False,
-                      condition='importFrom==FROM_SCIPION',
                       label="Input volume",
                       help='Target EM map')
 
-        group = form.addGroup('Atom structure')
-        group.addParam('importFromAtom', params.EnumParam,
-                       choices=importChoices, default=self.FROM_SCIPION,
-                       label='Atom structure from',
-                       help='Select the atom structure source')
-        group.addParam('inputAtomStructFile', params.FileParam,
-                       allowsNull=False,
-                       condition='importFromAtom==FROM_FILE',
-                       label="Input pdb file",
-                       help='Select the atom structure file to be fitted in the volume')
-        group.addParam('inputAtomStruct', params.PointerParam,
+        form.addParam('inputAtomStruct', params.PointerParam,
                        pointerClass='AtomStruct', allowsNull=False,
-                       condition='importFromAtom==FROM_SCIPION',
                        label="Input atom structure",
                        help='Select the atom structure to be fitted in the volume')
 
@@ -138,15 +114,14 @@ class imodfitFlexFitting(Protocol):
                        help='Extra parameters as expected from the command line.'
                             'https://chaconlab.org/hybrid4em/imodfit/imodfit-intro')
 
-    def _getImportChoices(self):
-      return ['File', 'Scipion Object']
     def _get_cgChoices(self):
       return ['CA', '3BB2R', 'Full-Atom', 'NCAC']
 
     def _getImodfitArgs(self):
-      ccp4File = os.path.abspath(self.ccp4File)
+      ccp4AbsPath = os.path.abspath(self.ccp4File)
+      #ccp4AbsPath = '/home/danieldh/i2pc/software/em/iMODfit-1.51/imodfit_test/1oel.ccp4'
       #Standard arguments
-      args = [self.pdbFile, ccp4File, self.resolution.get(), self.cutoff.get()]
+      args = [self.pdbFile, ccp4AbsPath, self.resolution.get(), self.cutoff.get()]
       args += ['-i {}'.format(self.maxIter.get()), '-m {}'.format(self.cgModel.get())]
       if self.chiAngle.get():
         args += ['-x']
@@ -165,6 +140,18 @@ class imodfitFlexFitting(Protocol):
         args += ['{}'.format(self.extraParams.get())]
       return args
 
+    def _getMrcInputVol(self):
+      inpVol = self.inputVolume.get()
+      # Input volume as a ccp4 file
+      name, ext = os.path.splitext(inpVol.getFileName())
+      if ext != '.mrc':
+        mrcFile = self._getExtraPath(pwutils.replaceBaseExt(inpVol.getFileName(), 'mrc'))
+        _ih = ImageHandler()
+        _ih.convert(inpVol, mrcFile)
+      else:
+        mrcFile = inpVol.getFileName()
+      return mrcFile
+
     # --------------------------- STEPS functions ------------------------------
     def _insertAllSteps(self):
         # Insert processing steps
@@ -173,17 +160,11 @@ class imodfitFlexFitting(Protocol):
         self._insertFunctionStep('createOutputStep')
 
     def convertInputStep(self):
-      if self.importFrom.get() == self.FROM_SCIPION:
-        mrcFile = self.inputVolume.get().getFileName()
-      else:
-        mrcFile = self.inputVolumeFile.get()
-      self.ccp4File = pwutils.replaceBaseExt(mrcFile, 'ccp4')
+      mrcFile = self._getMrcInputVol()
+      self.ccp4File = self._getExtraPath(pwutils.replaceBaseExt(mrcFile, 'ccp4'))
       shutil.copy(mrcFile, self.ccp4File)
 
-      if self.importFromAtom.get() == self.FROM_SCIPION:
-        self.pdbFile = os.path.abspath(self.inputAtomStruct.get().getFileName())
-      else:
-        self.pdbFile = os.path.abspath(self.inputAtomStructFile.get())
+      self.pdbFile = os.path.abspath(self.inputAtomStruct.get().getFileName())
 
     def imodfitStep(self):
       Plugin.runIMODfit(self, 'imodfit_mkl',
@@ -193,12 +174,9 @@ class imodfitFlexFitting(Protocol):
     def createOutputStep(self):
         fittedPDB = AtomStruct(self._getExtraPath('{}_fitted.pdb'.format(self.outputBasename.get())))
         moviePDB = AtomStruct(self._getExtraPath('{}_movie.pdb'.format(self.outputBasename.get())))
-        if self.importFrom.get() == self.FROM_SCIPION:
-          fittedPDB.setVolume(self.inputVolume.get())
-          moviePDB.setVolume(self.inputVolume.get())
+        fittedPDB.setVolume(self.inputVolume.get())
+        moviePDB.setVolume(self.inputVolume.get())
 
-        elif self.importFrom.get() == self.FROM_FILE:
-          pass
         self._defineOutputs(fittedPDB=fittedPDB)
         self._defineOutputs(moviePDB=moviePDB)
 
