@@ -69,36 +69,11 @@ class TestImodfit(BaseTest):
         cls.launchProtocol(protImportPDB)
         cls.protImportPDB = protImportPDB
 
-    def _runChimeraFit(self):
-
-        extraCommands = ""
-        extraCommands += "fit #3 inMap #2\n"
-        extraCommands += "scipionwrite #3 " \
-                         "prefix DONOTSAVESESSION_\n"
-        extraCommands += "exit\n"
-
-        args = {'extraCommands': extraCommands,
-                'inputVolume': self.protImportVol.outputVolume,
-                'pdbFileToBeRefined': self.protImportPDB.outputPdb
-                }
-        ChimeraProtRigidFit = Domain.importFromPlugin('chimera.protocols',
-                                                      'ChimeraProtRigidFit',
-                                                      doRaise=True)
-        protChimeraFit = self.newProtocol(ChimeraProtRigidFit, **args)
-        protChimeraFit.setObjLabel('chimera fit\n volume and pdb\n ')
-        self.launchProtocol(protChimeraFit)
-        PDB_output = eval("protChimeraFit.DONOTSAVESESSION_Atom_struct__3_%06d"
-                          % protChimeraFit.getObjId())
-        self.assertIsNotNone(PDB_output.getFileName(),
-                             "There was a problem with the alignment")
-        return PDB_output
-
     def _runIMODFIT(self):
-        PDB_output = self._runChimeraFit()
         protImodfit = self.newProtocol(
             imodfitFlexFitting,
             inputVolume=self.protImportVol.outputVolume,
-            inputAtomStruct=PDB_output)
+            inputAtomStruct=self.protImportPDB.outputPdb)
 
         self.launchProtocol(protImodfit)
         pdbOut = getattr(protImodfit, 'fittedPDB', None)

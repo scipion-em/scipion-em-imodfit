@@ -45,6 +45,7 @@ from pwem.convert import Ccp4Header
 class imodfitFlexFitting(Protocol):
     """
     Performs flexible fitting of a protein structure to a map.
+    A rigid fitting for ensuring their prior best positions is needed before performing this flexible fitting.
     Tutorial: https://chaconlab.org/hybrid4em/imodfit/imodfit-intro
     """
     _label = 'Flexible fitting'
