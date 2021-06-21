@@ -1,6 +1,6 @@
 # **************************************************************************
 # *
-# * Authors:     Grigory Sharov (gsharov@mrc-lmb.cam.ac.uk)
+# * Authors:     Daniel Del Hoyo (ddelhoyo@cnb.csic.es)
 # *
 # * MRC Laboratory of Molecular Biology (MRC-LMB)
 # *
@@ -30,6 +30,7 @@ import pwem
 import shutil, os
 from ..constants import IMODFIT, IMODFIT_DEFAULT_VERSION
 from ..protocols import imodfitFlexFitting
+from pwem import Domain
 
 
 FROM_FILE, FROM_SCIPION = 0, 1
@@ -40,9 +41,9 @@ class TestImodfit(BaseTest):
         testFolder = pwem.Config.EM_ROOT + '/{}-{}/imodfit_test/'.format(IMODFIT, IMODFIT_DEFAULT_VERSION)
         cls.pdbFile = testFolder + '1oel.pdb'
         cls.volFile = testFolder + '1sx4A.ccp4'
-        cls.mrcFile = testFolder + '1oel.mrc'
+        cls.mrcFile = testFolder + '1sx4A.mrc'
         if not os.path.exists(cls.mrcFile):
-            shutil.copy(cls.mrcFile.replace('mrc', 'ccp4'), cls.mrcFile)
+            shutil.copy(cls.volFile, cls.mrcFile)
 
         setupTestProject(cls)
         cls._runImportPDB()
