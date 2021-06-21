@@ -33,11 +33,14 @@ A rigid fitting for ensuring their prior best positions is needed before perform
 from pyworkflow.protocol import Protocol, params
 from pwem.objects.data import AtomStruct
 from pwem.emlib.image import ImageHandler
+from pwem.convert.atom_struct import toPdb
 from pyworkflow.utils import Message
 import pyworkflow.utils as pwutils
-import os
+import os, shutil
 from imodfit import Plugin
-import shutil
+
+from pwem.convert import Ccp4Header
+
 
 class imodfitFlexFitting(Protocol):
     """
@@ -152,6 +155,17 @@ class imodfitFlexFitting(Protocol):
         mrcFile = inpVol.getFileName()
       return mrcFile
 
+    def _getPdbInputStruct(self):
+      inpStruct = self.inputAtomStruct.get()
+      name, ext = os.path.splitext(inpStruct.getFileName())
+      if ext == '.cif':
+          cifFile = inpStruct.getFileName()
+          pdbFile = self._getExtraPath(pwutils.replaceBaseExt(cifFile, 'pdb'))
+          toPdb(cifFile, pdbFile)
+
+      else:
+        pdbFile = inpStruct.getFileName()
+      return os.path.abspath(pdbFile)
     # --------------------------- STEPS functions ------------------------------
     def _insertAllSteps(self):
         # Insert processing steps
@@ -160,11 +174,17 @@ class imodfitFlexFitting(Protocol):
         self._insertFunctionStep('createOutputStep')
 
     def convertInputStep(self):
-      mrcFile = self._getMrcInputVol()
-      self.ccp4File = self._getExtraPath(pwutils.replaceBaseExt(mrcFile, 'ccp4'))
-      shutil.copy(mrcFile, self.ccp4File)
+      inpVol = self.inputVolume.get()
+      self.ccp4File = self._getExtraPath(pwutils.replaceBaseExt(inpVol.getFileName(), 'ccp4'))
+      shutil.copy(inpVol.getFileName(), self.ccp4File)
 
-      self.pdbFile = os.path.abspath(self.inputAtomStruct.get().getFileName())
+      #Ensuring a proper ccp4 file header
+      sampling = inpVol.getSamplingRate()
+      origin = inpVol.getOrigin(force=True).getShifts()
+      ccp4H = Ccp4Header(self.ccp4File)
+      ccp4H.copyCCP4Header(origin, sampling, Ccp4Header.ORIGIN)
+
+      self.pdbFile = self._getPdbInputStruct()
 
     def imodfitStep(self):
       Plugin.runIMODfit(self, 'imodfit_mkl',
