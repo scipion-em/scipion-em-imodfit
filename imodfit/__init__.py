@@ -59,7 +59,7 @@ class Plugin(pwem.Plugin):
         # At this point of the installation execution cls.getHome() is None, so the em path should be provided
         pluginHome = join(pwem.Config.EM_ROOT, IMODFIT + '-' + IMODFIT_DEFAULT_VERSION)
         installationCmd = 'wget %s -O %s && ' % (cls._getImodfitDownloadUrl(), cls._getImodfitTxz())
-        installationCmd += 'tar Jxvf %s --strip-components 1 && ' % cls._getImodfitTxz()
+        installationCmd += 'tar -xf %s --strip-components 1 && ' % cls._getImodfitTxz()
         installationCmd += 'rm %s && ' % cls._getImodfitTxz()
 
         #Installing required libraries
