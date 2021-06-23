@@ -49,8 +49,8 @@ class Plugin(pwem.Plugin):
         runtimePath = join(pwem.Config.EM_ROOT, IMODFIT + '-' + IMODFIT_DEFAULT_VERSION)
 
         # Add required disperse path to PATH and pyto path to PYTHONPATH
-        environ.update({'LD_LIBRARY_PATH': os.pathsep.join([join(runtimePath, 'intel_mkl/mkl/latest/lib/intel64'),
-                                                            join(runtimePath, 'intel_mkl/mkl/latest/lib/ia32')])
+        environ.update({'LD_LIBRARY_PATH': os.pathsep.join(['~/intel/oneapi/mkl/latest/lib/intel64',
+                                                            '~/intel/oneapi/mkl/latest/lib/ia32'])
                         })
         return environ
 
@@ -65,7 +65,8 @@ class Plugin(pwem.Plugin):
         #Installing required libraries
         installationCmd += 'wget %s -O %s && ' % (cls._getLibrariesDownloadUrl(), cls._getMKLsh())
         installationCmd += 'chmod +x %s && ' % cls._getMKLsh()
-        installationCmd += 'sh %s -a -s --install-dir %s --eula accept&& ' % (cls._getMKLsh(), pluginHome + '/intel_mkl')
+        installationCmd += 'sh %s -a -s --eula accept && ' % \
+                           (cls._getMKLsh())
 
         #Creating validation file
         IMODFIT_INSTALLED = '%s_installed' % IMODFIT
