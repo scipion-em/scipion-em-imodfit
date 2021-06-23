@@ -97,7 +97,7 @@ class Plugin(pwem.Plugin):
 
     @classmethod
     def _getImodfitDownloadUrl(cls):
-        return '\"https://chaconlab.org/hybrid4em/imodfit/imodfit-donwload?task=callelement&format=raw&item_id=43&element=f85c494b-2b32-4109-b8c1-083cca2b7db6&method=download&args[0]=1c4c1e38f990758abe1f7179e2bae49f\"'
+        return '\"https://chaconlab.org/hybrid4em/imodfit/imodfit-donwload?task=callelement&format=raw&item_id=23&element=f85c494b-2b32-4109-b8c1-083cca2b7db6&method=download&args[0]=d3da3168d547801010043ca84f4b3d2f\"'
 
     @classmethod
     def _getLibrariesDownloadUrl(cls):
