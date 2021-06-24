@@ -1,8 +1,8 @@
 # **************************************************************************
 # *
-# * Authors:     Scipion Team
+# * Authors:  Daniel Del Hoyo (ddelhoyo@cnb.csic.es)
 # *
-# * your institution
+# * Unidad de  Bioinformatica of Centro Nacional de Biotecnologia , CSIC
 # *
 # * This program is free software; you can redistribute it and/or modify
 # * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@
 from os.path import join
 import pwem
 import os
+import urllib.request
 
 from pyworkflow.utils import Environ
 from .constants import *
@@ -49,8 +50,9 @@ class Plugin(pwem.Plugin):
         runtimePath = join(pwem.Config.EM_ROOT, IMODFIT + '-' + IMODFIT_DEFAULT_VERSION)
 
         # Add required disperse path to PATH and pyto path to PYTHONPATH
-        environ.update({'LD_LIBRARY_PATH': os.pathsep.join([join(runtimePath, 'intel_mkl/mkl/latest/lib/intel64'),
-                                                            join(runtimePath, 'intel_mkl/mkl/latest/lib/ia32')])
+        userHomePath = os.path.expanduser('~')
+        environ.update({'LD_LIBRARY_PATH': os.pathsep.join([userHomePath+'/intel/oneapi/mkl/latest/lib/intel64',
+                                                            userHomePath+'/intel/oneapi/mkl/latest/lib/ia32'])
                         })
         return environ
 
@@ -59,13 +61,14 @@ class Plugin(pwem.Plugin):
         # At this point of the installation execution cls.getHome() is None, so the em path should be provided
         pluginHome = join(pwem.Config.EM_ROOT, IMODFIT + '-' + IMODFIT_DEFAULT_VERSION)
         installationCmd = 'wget %s -O %s && ' % (cls._getImodfitDownloadUrl(), cls._getImodfitTxz())
-        installationCmd += 'tar Jxvf %s --strip-components 1 && ' % cls._getImodfitTxz()
+        installationCmd += 'tar -xf %s --strip-components 1 && ' % cls._getImodfitTxz()
         installationCmd += 'rm %s && ' % cls._getImodfitTxz()
 
         #Installing required libraries
         installationCmd += 'wget %s -O %s && ' % (cls._getLibrariesDownloadUrl(), cls._getMKLsh())
         installationCmd += 'chmod +x %s && ' % cls._getMKLsh()
-        installationCmd += 'sh %s -a -s --install-dir %s --eula accept&& ' % (cls._getMKLsh(), pluginHome + '/intel_mkl')
+        installationCmd += 'sh %s -a -s --eula accept && ' % \
+                           (cls._getMKLsh())
 
         #Creating validation file
         IMODFIT_INSTALLED = '%s_installed' % IMODFIT
@@ -97,8 +100,15 @@ class Plugin(pwem.Plugin):
 
     @classmethod
     def _getImodfitDownloadUrl(cls):
-        return '\"https://chaconlab.org/hybrid4em/imodfit/imodfit-donwload?task=callelement&format=raw&item_id=23&element=f85c494b-2b32-4109-b8c1-083cca2b7db6&method=download&args[0]=bdeff707f064767c61740272a9a841b8\"'
-        #return '\"http://chaconlab.org/hybrid4em/imodfit/imodfit-donwload?task=callelement&format=raw&item_id=23&element=f85c494b-2b32-4109-b8c1-083cca2b7db6&method=download&args[0]=04212bec7d8318196a7e2d77e8394b15\"'
+        html = urllib.request.urlopen("https://chaconlab.org/hybrid4em/imodfit/imodfit-donwload/item/imodfit-linux64")
+        htmlStr = html.read().decode('utf-8')
+        for line in htmlStr.split('\n'):
+            if 'href="/hybrid4em/imodfit/imodfit-donwload?task=callelement&amp;format=raw&amp;item_id=23' in line:
+                for element in line.split(' '):
+                    if element.startswith('href='):
+                        url = '\"https://chaconlab.org' + element.split('href="')[1]
+                        return url
+        print('Could not find the package url in the https://chaconlab.org web')
 
     @classmethod
     def _getLibrariesDownloadUrl(cls):
