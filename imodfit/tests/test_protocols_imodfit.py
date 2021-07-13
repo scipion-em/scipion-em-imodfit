@@ -76,7 +76,7 @@ class TestImodfit(BaseTest):
             inputAtomStruct=self.protImportPDB.outputPdb)
 
         self.launchProtocol(protImodfit)
-        pdbOut = getattr(protImodfit, 'fittedPDB', None)
+        pdbOut = getattr(protImodfit, 'fittedAtomStruct', None)
         self.assertIsNotNone(pdbOut)
 
     def test_IMODFIT_fromScipion(self):
