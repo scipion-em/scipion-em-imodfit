@@ -109,7 +109,7 @@ class imodfitFlexFitting(Protocol):
         group.addParam('outputMovie', params.BooleanParam,
                       default=True,
                       label='Outputs a Multi-PDB',
-                      help=' 	Outputs a Multi-PDB trajectory movie (<basename_movie>.pdb)')
+                      help='Outputs a Multi-PDB trajectory movie (<basename_movie>.pdb)')
 
         group = form.addGroup('Extra')
         group.addParam('extraParams', params.StringParam,
@@ -198,8 +198,8 @@ class imodfitFlexFitting(Protocol):
         fittedPDB.setVolume(self.inputVolume.get())
         moviePDB.setVolume(self.inputVolume.get())
 
-        self._defineOutputs(fittedPDB=fittedPDB)
-        self._defineOutputs(moviePDB=moviePDB)
+        self._defineOutputs(fittedAtomStruct=fittedPDB)
+        self._defineOutputs(movieAtomStruct=moviePDB)
 
     # --------------------------- INFO functions -----------------------------------
     def _summary(self):
