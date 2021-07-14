@@ -38,6 +38,7 @@ from pyworkflow.utils import Message
 import pyworkflow.utils as pwutils
 import os, shutil
 from imodfit import Plugin
+import pwem.convert as emconv
 
 from pwem.convert import Ccp4Header
 
@@ -209,3 +210,32 @@ class imodfitFlexFitting(Protocol):
     def _methods(self):
         methods = []
         return methods
+
+    def _countNumberOfChains(self, inpFile):
+      structureHandler = emconv.AtomicStructHandler()
+      structureHandler.read(inpFile)
+      structureHandler.getStructure()
+      listOfChains, listOfResidues = structureHandler.getModelsChains()
+      return len(listOfChains)
+
+    def _countNumberOfAtoms(self, inpFile):
+      with open(inpFile) as f:
+        fileStr = f.read()
+      return fileStr.count('ATOM')
+
+    def validate(self):
+        """ Try to find errors on define params. """
+        errors = []
+        inpFile = os.path.abspath(self.inputAtomStruct.get().getFileName())
+        if not 'pdb' in inpFile:
+            nChains, nAtoms = self._countNumberOfChains(inpFile), self._countNumberOfAtoms(inpFile)
+            if nChains > 62:
+              errors.append('The atom structure file {} is too big for converting to pdb, '
+                            'which is needed for running imodfit. Number of chains ({}) > 62'
+                            .format(inpFile.split('/')[-1], nChains))
+            elif nAtoms > 99999:
+              errors.append('The atom structure file {} is too big for converting to pdb, '
+                            'which is needed for running imodfit. Number of atoms ({}) > 99999'.
+                            format(inpFile.split('/')[-1], nAtoms))
+
+        return errors
