@@ -29,8 +29,7 @@ from pwem.protocols import ProtImportVolumes, ProtImportPdb
 import pwem
 import shutil, os
 from ..constants import IMODFIT, IMODFIT_DEFAULT_VERSION
-from ..protocols import imodfitFlexFitting
-from pwem import Domain
+from ..protocols import ImodfitFlexFitting
 
 
 FROM_FILE, FROM_SCIPION = 0, 1
@@ -71,7 +70,7 @@ class TestImodfit(BaseTest):
 
     def _runIMODFIT(self):
         protImodfit = self.newProtocol(
-            imodfitFlexFitting,
+            ImodfitFlexFitting,
             inputVolume=self.protImportVol.outputVolume,
             inputAtomStruct=self.protImportPDB.outputPdb)
 

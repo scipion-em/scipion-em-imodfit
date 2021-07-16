@@ -25,7 +25,7 @@
 # **************************************************************************
 
 
-from ..protocols import imodfitFlexFitting
+from ..protocols import ImodfitFlexFitting
 import pyworkflow.protocol.params as params
 from pwem.viewers import Chimera, ChimeraView, VmdViewer, EmProtocolViewer
 from distutils.spawn import find_executable
@@ -35,7 +35,7 @@ FITTED_PDB, MOVIE_PDB = 0, 1
 
 class viewerImodfitVMD(EmProtocolViewer):
   _label = 'Viewer pdb movie'
-  _targets = [imodfitFlexFitting]
+  _targets = [ImodfitFlexFitting]
 
   def _defineParams(self, form):
     form.addSection(label='Visualization of output PDB and PDB movie')

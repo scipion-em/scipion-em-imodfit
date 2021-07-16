@@ -43,7 +43,7 @@ import pwem.convert as emconv
 from pwem.convert import Ccp4Header
 
 
-class imodfitFlexFitting(Protocol):
+class ImodfitFlexFitting(Protocol):
     """
     Performs flexible fitting of a protein structure to a map.
     A rigid fitting for ensuring their prior best positions is needed before performing this flexible fitting.
