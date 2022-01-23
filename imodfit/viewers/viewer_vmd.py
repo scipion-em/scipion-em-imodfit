@@ -82,16 +82,16 @@ class viewerImodfitVMD(EmProtocolViewer):
   def _showPDBChimera(self):
     """ Create a chimera script to visualize selected PDB. """
     if self.displayOutput.get() == FITTED_PDB:
-      outputPDB = self.protocol.fittedPDB
+      outputPDB = self.protocol.fittedAtomStruct
     elif self.displayOutput.get() == MOVIE_PDB:
-      outputPDB = self.protocol.moviePDB
+      outputPDB = self.protocol.movieAtomStruct
     return [ChimeraView(outputPDB.getFileName())]
 
   def _showPDBVMD(self):
     if self.displayOutput.get() == FITTED_PDB:
-      outputPDB = self.protocol.fittedPDB
+      outputPDB = self.protocol.fittedAtomStruct
     elif self.displayOutput.get() == MOVIE_PDB:
-      outputPDB = self.protocol.moviePDB
+      outputPDB = self.protocol.movieAtomStruct
     vmdV = VmdViewer(project=self.getProject())
     vmdV.visualize(outputPDB)
 
