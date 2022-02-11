@@ -31,3 +31,9 @@ IMODFIT = 'iMODfit'
 # Supported versions:
 V1_51 = '1.51'
 IMODFIT_DEFAULT_VERSION = V1_51
+
+TCL_STR = '''display resetview
+mol addrep 0
+display resetview
+mol new {%s} type {pdb} first 0 last -1 step 1 waitfor 1
+'''

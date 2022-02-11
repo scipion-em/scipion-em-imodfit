@@ -24,10 +24,11 @@
 # *
 # **************************************************************************
 
-
+import os
 from ..protocols import ImodfitFlexFitting
+from ..constants import *
 import pyworkflow.protocol.params as params
-from pwem.viewers import Chimera, ChimeraView, VmdViewer, EmProtocolViewer
+from pwem.viewers import Chimera, ChimeraViewer, VmdView, EmProtocolViewer
 from distutils.spawn import find_executable
 
 VOLUME_CHIMERA, VOLUME_VMD = 0, 1
@@ -82,16 +83,25 @@ class viewerImodfitVMD(EmProtocolViewer):
   def _showPDBChimera(self):
     """ Create a chimera script to visualize selected PDB. """
     if self.displayOutput.get() == FITTED_PDB:
-      outputPDB = self.protocol.fittedAtomStruct
+      outputAS = self.protocol.fittedAtomStruct
     elif self.displayOutput.get() == MOVIE_PDB:
-      outputPDB = self.protocol.movieAtomStruct
-    return [ChimeraView(outputPDB.getFileName())]
+      outputAS = self.protocol.movieAtomStruct
+
+    CViewer = ChimeraViewer(project=self.getProject(), protocol=self.protocol)
+    return CViewer._visualize(outputAS)
 
   def _showPDBVMD(self):
     if self.displayOutput.get() == FITTED_PDB:
-      outputPDB = self.protocol.fittedAtomStruct
+      tclName = 'fitted'
+      outputAS = self.protocol.fittedAtomStruct
     elif self.displayOutput.get() == MOVIE_PDB:
-      outputPDB = self.protocol.movieAtomStruct
-    vmdV = VmdViewer(project=self.getProject())
-    vmdV.visualize(outputPDB)
+      tclName = 'movie'
+      outputAS = self.protocol.movieAtomStruct
+
+    tclFile = self.protocol._getExtraPath('{}.tcl'.format(tclName))
+    with open(tclFile, 'w') as f:
+        f.write(TCL_STR % (os.path.abspath(outputAS.getFileName())))
+                           #os.path.abspath(outputAS.getVolume().getFileName())))
+    args = '-e {}'.format(os.path.abspath(tclFile))
+    return [VmdView(args, cwd=self.protocol._getExtraPath())]
 
