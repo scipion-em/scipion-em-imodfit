@@ -118,6 +118,7 @@ class ImodfitFlexFitting(Protocol):
                        label='Extra parameters',
                        help='Extra parameters as expected from the command line.'
                             'https://chaconlab.org/hybrid4em/imodfit/imodfit-intro')
+        form.addParallelSection(threads=4, mpi=1)
 
     def _get_cgChoices(self):
       return ['CA', '3BB2R', 'Full-Atom', 'NCAC']
@@ -143,6 +144,8 @@ class ImodfitFlexFitting(Protocol):
       #Extra parameters
       if self.extraParams.get() != '':
         args += ['{}'.format(self.extraParams.get())]
+
+      args += ['--nthreads', self.numberOfThreads.get()]
       return args
 
     def _getMrcInputVol(self):
