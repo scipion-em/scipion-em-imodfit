@@ -28,6 +28,7 @@ import pwem
 import os
 import urllib.request
 
+from pyworkflow import MODELLING
 from pyworkflow.utils import Environ
 from .constants import *
 
@@ -38,6 +39,7 @@ __version__ = '1.51'
 class Plugin(pwem.Plugin):
     _homeVar = IMODFIT_HOME
     _pathVars = [IMODFIT_HOME]
+    _processingField = [MODELLING]
 
     @classmethod
     def _defineVariables(cls):
