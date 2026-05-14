@@ -44,9 +44,165 @@ from pwem.convert import Ccp4Header
 
 class imodfitFlexFitting(Protocol):
     """
-    Performs flexible fitting of a protein structure to a map.
-    A rigid fitting for ensuring their prior best positions is needed before performing this flexible fitting.
-    Tutorial: https://chaconlab.org/hybrid4em/imodfit/imodfit-intro
+    Performs flexible fitting of a protein structure to an electron
+    microscopy density map in order to adapt an atomic model to the
+    conformational landscape observed experimentally. The protocol is
+    intended for situations in which rigid-body fitting is insufficient
+    because the structure must undergo internal deformations to match
+    the target density. A prior rigid fitting step is recommended to
+    ensure that the initial position of the structure is already
+    approximately aligned with the map. Tutorial:
+    https://chaconlab.org/hybrid4em/imodfit/imodfit-intro
+
+    AI Generated:
+
+    Flexible Fitting Protocol (imodfitFlexFitting) - User Manual
+        Overview
+
+        The Flexible Fitting protocol refines the conformation of an
+        atomic structure so that it better matches an experimental
+        cryo-EM density map. Unlike rigid fitting approaches that only
+        translate and rotate the structure as a whole, flexible fitting
+        allows internal structural rearrangements, making it especially
+        useful for proteins and macromolecular assemblies that undergo
+        biologically relevant conformational changes.
+
+        In cryo-EM studies, it is common for experimentally determined
+        maps to capture states that differ from the available atomic
+        models. Flexible fitting bridges this gap by deforming the model
+        in a physically meaningful way while preserving overall
+        structural integrity. This approach is particularly valuable
+        when studying molecular motions, domain rearrangements, ligand-
+        induced conformational changes, or assemblies with flexible
+        regions.
+
+        Inputs and Biological Context
+
+        The protocol requires two principal inputs: an electron density
+        map and an atomic structure. The map represents the experimental
+        target obtained from cryo-EM reconstruction, while the atomic
+        structure provides the starting conformation that will be
+        adapted to the map.
+
+        A biologically meaningful fitting requires that the initial
+        structure already occupies approximately the correct position
+        and orientation inside the density. For this reason, a rigid
+        fitting stage is strongly recommended before performing flexible
+        refinement. If the initial placement is poor, the resulting
+        deformations may become unrealistic or fail to converge toward a
+        meaningful solution.
+
+        The protocol supports structures originating from both PDB and
+        mmCIF formats, making it compatible with modern structural
+        biology repositories and modeling workflows.
+
+        Resolution and Density Threshold
+
+        The target map resolution plays an important role in determining
+        the level of structural detail that can be reliably interpreted.
+        Lower-resolution maps generally support large-scale domain
+        motions and overall conformational adaptation, whereas higher-
+        resolution maps can guide more detailed local refinements.
+
+        The density threshold determines which regions of the map
+        contribute to the fitting process. Proper threshold selection is
+        biologically important because it helps distinguish meaningful
+        molecular density from background noise. Excessively low
+        thresholds may introduce noise-driven distortions, while overly
+        restrictive thresholds may exclude flexible or weakly resolved
+        regions that are biologically relevant.
+
+        Coarse-Grained Models and Structural Representation
+
+        The protocol offers several coarse-grained representations that
+        control the balance between computational efficiency and
+        structural detail. Simplified representations are useful for
+        exploring large conformational motions efficiently, particularly
+        in very large macromolecular assemblies. Full-atom
+        representations provide more detailed refinements but generally
+        require greater computational effort.
+
+        From a biological perspective, coarse-grained approaches are
+        often sufficient for capturing collective domain movements or
+        major conformational transitions. Full-atom refinement becomes
+        more important when detailed structural interpretation or
+        downstream atomic analysis is required.
+
+        Conformational Flexibility and Normal Modes
+
+        The fitting strategy relies on collective motions that describe
+        biologically plausible deformations of the structure. The number
+        and range of modes included during refinement determine how much
+        flexibility is allowed during the adaptation process.
+
+        Restricting the fitting to lower-frequency collective motions
+        usually produces smoother and more biologically realistic
+        deformations. Allowing too many highly localized motions may
+        increase the risk of overfitting the experimental density,
+        especially in noisy or low-resolution maps.
+
+        The protocol also allows the inclusion of side-chain flexibility
+        through dihedral-angle refinement. This option may improve local
+        agreement with the density in well-resolved regions, although it
+        also increases conformational complexity.
+
+        Iterative Refinement Strategy
+
+        Flexible fitting is performed iteratively, progressively adapting
+        the structure to improve agreement with the density map. The
+        maximum number of iterations controls how extensively the
+        conformational search is explored.
+
+        In practice, convergence behavior depends strongly on the
+        quality of the starting model, the resolution of the map, and
+        the intrinsic flexibility of the biological system. Large and
+        heterogeneous complexes may require more extensive refinement
+        than compact and rigid proteins.
+
+        Outputs and Structural Interpretation
+
+        The protocol produces a fitted atomic structure representing the
+        refined conformation adapted to the target map. Optionally, it
+        can also generate trajectory-like outputs that capture the
+        progressive conformational changes during the fitting process.
+
+        These trajectory outputs are especially valuable for biological
+        interpretation because they help visualize the transition between
+        the starting conformation and the final fitted state. Such
+        information can provide insight into collective domain motions,
+        hinge rearrangements, or flexible transitions associated with
+        biological activity.
+
+        Full-atom outputs may also be generated for downstream atomic
+        analysis, visualization, or structural validation workflows.
+
+        Practical Recommendations
+
+        In routine cryo-EM workflows, it is advisable to begin with a
+        well-positioned rigid fit and conservative flexibility settings.
+        Excessive flexibility may produce unrealistic deformations,
+        particularly when the map resolution is limited or when the
+        density contains substantial noise.
+
+        For large conformational transitions, coarse-grained models
+        usually provide more stable behavior and better convergence.
+        Higher-detail refinements should generally be reserved for maps
+        with sufficient resolution to support detailed structural
+        interpretation.
+
+        Users should always visually inspect the fitted model relative
+        to the density map and verify that biologically important
+        regions remain structurally plausible after refinement.
+
+        Final Perspective
+
+        Flexible fitting is one of the most powerful strategies for
+        integrating atomic structures with cryo-EM density maps when
+        conformational variability is present. By allowing controlled
+        structural adaptation guided by experimental density, the
+        protocol enables biologically meaningful interpretation of
+        dynamic molecular states while preserving realistic structural
+        behavior.
     """
     _label = 'Flexible fitting'
 
